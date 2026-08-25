@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 	"net/http"
 	"net/netip"
@@ -21,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -840,6 +842,119 @@ func nodeAddress(ip, port string) string {
 	return net.JoinHostPort(strings.Trim(ip, "[]"), port)
 }
 
+type preferredIPScore struct {
+	ip    string
+	score time.Duration
+}
+
+// parsePreferredIPs accepts the same comma/newline format as the desktop
+// client and ignores inline comments after '#'.
+func parsePreferredIPs(raw string) []string {
+	parts := strings.FieldsFunc(raw, func(r rune) bool {
+		return r == ',' || r == '\n' || r == '\r' || r == ';'
+	})
+	result := make([]string, 0, len(parts))
+	seen := make(map[string]struct{}, len(parts))
+	for _, part := range parts {
+		ip := strings.TrimSpace(strings.SplitN(part, "#", 2)[0])
+		if ip == "" {
+			continue
+		}
+		if _, exists := seen[ip]; exists {
+			continue
+		}
+		seen[ip] = struct{}{}
+		result = append(result, ip)
+	}
+	return result
+}
+
+func probePreferredIP(parent context.Context, ip string) (time.Duration, error) {
+	ctx, cancel := context.WithTimeout(parent, 2*time.Second)
+	defer cancel()
+	start := time.Now()
+	dialer := net.Dialer{}
+	conn, err := dialer.DialContext(ctx, "tcp", nodeAddress(ip, "443"))
+	if err != nil {
+		return 0, err
+	}
+	_ = conn.Close()
+	return time.Since(start), nil
+}
+
+// rankPreferredIPs mirrors main.py's startup smart selector: probe candidates
+// concurrently, score latency plus jitter, and retain the fastest three.
+func rankPreferredIPs(parent context.Context, raw string, limit int) []string {
+	ips := parsePreferredIPs(raw)
+	if len(ips) <= 1 || limit <= 0 {
+		return ips
+	}
+	type probeResult struct {
+		ip      string
+		samples []time.Duration
+	}
+	results := make(chan probeResult, len(ips))
+	var wg sync.WaitGroup
+	for _, ip := range ips {
+		wg.Add(1)
+		go func(candidate string) {
+			defer wg.Done()
+			samples := make([]time.Duration, 0, 3)
+			for attempt := 0; attempt < 3; attempt++ {
+				latency, err := probePreferredIP(parent, candidate)
+				if err == nil {
+					samples = append(samples, latency)
+				}
+				if attempt < 2 {
+					if !waitForContext(parent, 40*time.Millisecond) {
+						return
+					}
+				}
+			}
+			if len(samples) > 0 {
+				results <- probeResult{ip: candidate, samples: samples}
+			}
+		}(ip)
+	}
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	scores := make([]preferredIPScore, 0, len(ips))
+	for result := range results {
+		var total time.Duration
+		for _, sample := range result.samples {
+			total += sample
+		}
+		average := total / time.Duration(len(result.samples))
+		var variance float64
+		for _, sample := range result.samples {
+			delta := float64(sample - average)
+			variance += delta * delta
+		}
+		jitter := time.Duration(0)
+		if len(result.samples) > 1 {
+			jitter = time.Duration(math.Sqrt(variance / float64(len(result.samples)-1)))
+		}
+		scores = append(scores, preferredIPScore{ip: result.ip, score: average + jitter/2})
+	}
+	if len(scores) == 0 {
+		log.Printf("[优选] 所有候选 IP 测速失败，保留原始节点池")
+		return ips
+	}
+	sort.SliceStable(scores, func(i, j int) bool { return scores[i].score < scores[j].score })
+	if limit > len(scores) {
+		limit = len(scores)
+	}
+	selected := make([]string, 0, limit)
+	for _, score := range scores[:limit] {
+		selected = append(selected, score.ip)
+	}
+	log.Printf("[优选] 智能测速完成，节点池: %s", strings.Join(selected, ","))
+	return selected
+}
+
 func normalizeDoHURL(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
@@ -1346,6 +1461,10 @@ var (
 // StartSocksProxy 启动本地 SOCKS5 代理并桥接到远端 WSS/ECH
 // 对应 Java: Tunnel.startSocksProxy(localAddr, wsAddr, echDns, echDomain, prefIp, token)
 func StartSocksProxy(localAddr, wsAddr, echDns, echName, prefIp, tokenStr string) error {
+	return StartSocksProxyWithOptions(localAddr, wsAddr, echDns, echName, prefIp, tokenStr, "bypass_cn", false, true)
+}
+
+func StartSocksProxyWithOptions(localAddr, wsAddr, echDns, echName, prefIp, tokenStr, routeMode string, fakeIP, autoBest bool) error {
 	localAddr = strings.TrimSpace(localAddr)
 	if _, err := net.ResolveTCPAddr("tcp", localAddr); err != nil {
 		return fmt.Errorf("无效的本地监听地址: %w", err)
@@ -1378,6 +1497,8 @@ func StartSocksProxy(localAddr, wsAddr, echDns, echName, prefIp, tokenStr string
 	echDomain = echName
 	token = tokenStr
 	serverIP = strings.TrimSpace(prefIp)
+	routingMode = normalizeRoutingMode(routeMode)
+	useFakeIP = fakeIP
 	listenAddr = localAddr
 	echListMu.Lock()
 	echList = nil
@@ -1392,7 +1513,11 @@ func StartSocksProxy(localAddr, wsAddr, echDns, echName, prefIp, tokenStr string
 		_ = prepareECH()
 		go startECHAutoRefresh(ctx)
 		go cleanDNSCacheLoop(ctx)
-		initNodeManager(ctx, serverIP)
+		preferredIPs := serverIP
+		if autoBest {
+			preferredIPs = strings.Join(rankPreferredIPs(ctx, serverIP, 3), ",")
+		}
+		initNodeManager(ctx, preferredIPs)
 		go startWSPoolManager(ctx)
 
 		if routingMode == "bypass_cn" {
@@ -1415,6 +1540,15 @@ func StartSocksProxy(localAddr, wsAddr, echDns, echName, prefIp, tokenStr string
 
 // StopSocksProxy 停止本地 SOCKS5 代理
 // 对应 Java: Tunnel.stopSocksProxy()
+func normalizeRoutingMode(mode string) string {
+	switch strings.ToLower(strings.TrimSpace(mode)) {
+	case "global", "none", "bypass_cn":
+		return strings.ToLower(strings.TrimSpace(mode))
+	default:
+		return "bypass_cn"
+	}
+}
+
 func StopSocksProxy() {
 	proxyServerMu.Lock()
 	if !proxyServerRunning {

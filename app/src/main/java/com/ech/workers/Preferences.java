@@ -38,6 +38,9 @@ public class Preferences
         public static final String ECH_DOMAIN = "EchDomain";
         public static final String PREF_IP = "PrefIp";
         public static final String TOKEN = "Token";
+        public static final String ROUTING_MODE = "RoutingMode";
+        public static final String AUTO_BEST = "AutoBest";
+        public static final String FAKE_IP = "FakeIp";
         
         // Profile Management
         public static final String CURRENT_PROFILE_ID = "CurrentProfileId";
@@ -122,7 +125,7 @@ public class Preferences
             editor.remove(PROFILE_NAME_PREFIX + id);
             
             // Clean up all keys for this profile
-            String[] keys = {WSS_ADDR, ECH_DNS, ECH_DOMAIN, PREF_IP, TOKEN};
+            String[] keys = {WSS_ADDR, ECH_DNS, ECH_DOMAIN, PREF_IP, TOKEN, ROUTING_MODE, AUTO_BEST, FAKE_IP};
             for (String k : keys) {
                 editor.remove(k + "_" + id);
             }
@@ -288,6 +291,36 @@ public class Preferences
         public void setToken(String t) {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(getKey(TOKEN), t);
+                editor.commit();
+        }
+
+        public String getRoutingMode() {
+                return prefs.getString(getKey(ROUTING_MODE), "bypass_cn");
+        }
+
+        public void setRoutingMode(String mode) {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(getKey(ROUTING_MODE), mode);
+                editor.commit();
+        }
+
+        public boolean getAutoBest() {
+                return prefs.getBoolean(getKey(AUTO_BEST), true);
+        }
+
+        public void setAutoBest(boolean enable) {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(getKey(AUTO_BEST), enable);
+                editor.commit();
+        }
+
+        public boolean getFakeIp() {
+                return prefs.getBoolean(getKey(FAKE_IP), true);
+        }
+
+        public void setFakeIp(boolean enable) {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(getKey(FAKE_IP), enable);
                 editor.commit();
         }
 

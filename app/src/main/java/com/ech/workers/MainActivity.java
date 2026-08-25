@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.Toast;
 import android.net.VpnService;
 import android.os.Handler;
@@ -45,6 +46,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private EditText edittext_pref_ip;
     private EditText edittext_token;
     private CheckBox checkbox_global;
+    private Spinner spinner_routing;
+    private Switch switch_auto_best;
+    private Switch switch_fake_ip;
     // IPv4/IPv6 默认启用，不在 UI 展示
     private Button button_apps;
     private Button button_control;
@@ -69,6 +73,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         edittext_pref_ip = (EditText) findViewById(R.id.pref_ip);
         edittext_token = (EditText) findViewById(R.id.token);
         checkbox_global = (CheckBox) findViewById(R.id.global);
+        spinner_routing = (Spinner) findViewById(R.id.routing_mode);
+        switch_auto_best = (Switch) findViewById(R.id.auto_best);
+        switch_fake_ip = (Switch) findViewById(R.id.fake_ip);
         button_apps = (Button) findViewById(R.id.apps);
         button_control = (Button) findViewById(R.id.control);
 
@@ -77,6 +84,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         btn_rename_profile.setOnClickListener(this);
         btn_delete_profile.setOnClickListener(this);
         checkbox_global.setOnClickListener(this);
+        switch_auto_best.setOnClickListener(this);
+        switch_fake_ip.setOnClickListener(this);
         button_apps.setOnClickListener(this);
         button_control.setOnClickListener(this);
         
@@ -272,7 +281,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 	@Override
 	public void onClick(View view) {
-        if (view == checkbox_global) {
+        if (view == checkbox_global || view == switch_auto_best || view == switch_fake_ip) {
             savePrefs();
             updateUI();
         } else if (view == button_apps) {
@@ -320,6 +329,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         edittext_pref_ip.setText(prefs.getPrefIp());
         edittext_token.setText(prefs.getToken());
         checkbox_global.setChecked(prefs.getGlobal());
+        String routing = prefs.getRoutingMode();
+        spinner_routing.setSelection("global".equals(routing) ? 1 : ("none".equals(routing) ? 2 : 0));
+        switch_auto_best.setChecked(prefs.getAutoBest());
+        switch_fake_ip.setChecked(prefs.getFakeIp());
 
         boolean editable = !prefs.getEnable();
         edittext_socks_port.setEnabled(editable);
@@ -329,6 +342,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         edittext_pref_ip.setEnabled(editable);
         edittext_token.setEnabled(editable);
         checkbox_global.setEnabled(editable);
+        spinner_routing.setEnabled(editable);
+        switch_auto_best.setEnabled(editable);
+        switch_fake_ip.setEnabled(editable);
         
         boolean globalChecked = checkbox_global.isChecked();
         button_apps.setEnabled(editable && !globalChecked);
@@ -346,6 +362,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         int grey = 0xFFBDBDBD;
         spinner_profiles.setAlpha(editable ? 1.0f : 0.5f);
+        spinner_routing.setAlpha(editable ? 1.0f : 0.5f);
         btn_add_profile.setBackgroundTintList(android.content.res.ColorStateList.valueOf(editable ? 0xFF4CAF50 : grey));
         btn_save_profile.setBackgroundTintList(android.content.res.ColorStateList.valueOf(editable ? 0xFF2196F3 : grey));
         btn_rename_profile.setBackgroundTintList(android.content.res.ColorStateList.valueOf(editable ? 0xFFFF9800 : grey));
@@ -377,6 +394,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         prefs.setEchDomain(edittext_ech_domain.getText().toString());
         prefs.setPrefIp(edittext_pref_ip.getText().toString());
         prefs.setToken(edittext_token.getText().toString());
+        String routing = "bypass_cn";
+        if (spinner_routing.getSelectedItemPosition() == 1) {
+            routing = "global";
+        } else if (spinner_routing.getSelectedItemPosition() == 2) {
+            routing = "none";
+        }
+        prefs.setRoutingMode(routing);
+        prefs.setAutoBest(switch_auto_best.isChecked());
+        prefs.setFakeIp(switch_fake_ip.isChecked());
         
         // IPv4/IPv6 默认启用
         prefs.setIpv4(true);

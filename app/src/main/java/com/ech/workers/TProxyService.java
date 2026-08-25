@@ -189,13 +189,16 @@ public class TProxyService extends VpnService {
                                 }
                         }
                         Tunnel.setDataDirectory(getFilesDir().getAbsolutePath());
-                        Tunnel.startSocksProxy(
+                        Tunnel.startSocksProxyWithOptions(
                                 prefs.getSocksAddress() + ":" + Integer.toString(prefs.getSocksPort()),
                                 wsAddr,
                                 prefs.getEchDns(),
                                 prefs.getEchDomain(),
                                 prefs.getPrefIp(),
-                                prefs.getToken()
+                                prefs.getToken(),
+                                prefs.getRoutingMode(),
+                                prefs.getFakeIp(),
+                                prefs.getAutoBest()
                         );
                 } catch (Exception e) {
                         try { TProxyStopService(); } catch (Throwable t) {}

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
         <string name="app_name">ECH-Workers</string>
+        <string name="app_subtitle">安全、快速的 ECH 隧道</string>
+        <string name="connection_section">连接参数</string>
+        <string name="routing_section">智能分流</string>
         <string name="socks_port">本地代理端口：</string>
         <string name="ipv4">IPv4</string>
         <string name="ipv6">IPv6</string>
@@ -12,7 +15,12 @@
         <string name="wss_addr">服务器地址（域名:端口）：</string>
         <string name="ech_dns">ECH DOH 服务器：</string>
         <string name="ech_domain">ECH 公钥查询域名：</string>
-        <string name="pref_ip">优选 IP：</string>
+        <string name="pref_ip">优选 IP 节点</string>
+        <string name="pref_ip_hint">每行一个 IP，可附带端口和 # 注释</string>
+        <string name="pref_ip_help">启动时并发测速，自动保留最快的 3 个节点</string>
+        <string name="routing_mode_label">流量模式</string>
+        <string name="auto_best">启动前智能测速</string>
+        <string name="fake_ip">启用 Fake-IP DNS</string>
         <string name="token">身份令牌：</string>
 
         <!-- Profile Management -->
@@ -31,4 +39,9 @@
         <string name="toast_cannot_delete_last">不能删除最后一个节点</string>
         <string name="ok">确定</string>
         <string name="cancel">取消</string>
+        <string-array name="routing_modes">
+                <item>智能分流（中国大陆直连）</item>
+                <item>全局代理</item>
+                <item>直连模式</item>
+        </string-array>
 </resources>

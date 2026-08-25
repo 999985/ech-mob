@@ -20,7 +20,7 @@ android {
                 versionName "1.0"
                 // archivesName 不在 defaultConfig 作用域，移至 base 扩展
                 ndk {
-                        abiFilters "armeabi-v7a", "arm64-v8a",'x86','x86_64'
+                        abiFilters "arm64-v8a"
                 }
                 externalNativeBuild {
                         ndkBuild {
@@ -53,12 +53,12 @@ android {
 			}
 		}
 
+        // Publish one APK containing every configured ABI. Keeping ABI splits
+        // enabled makes it too easy to sign/install an x86 split on an arm64
+        // phone, which fails with INSTALL_FAILED_NO_MATCHING_ABIS.
         splits {
                 abi {
-                        enable true
-                        reset()
-                        include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-                        universalApk true
+                        enable false
                 }
         }
 

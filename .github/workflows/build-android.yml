@@ -135,6 +135,18 @@ jobs:
             echo "::error title=Gradle build failure::${diagnostic}"
             exit "${gradle_status}"
           fi
+          echo "Generated APKs and native ABIs:"
+          find app/build/outputs/apk -type f -name '*.apk' -print -exec unzip -l {} \; | grep -E '(^[^ ]|lib/(arm64-v8a|armeabi-v7a|x86|x86_64)/.*\.so$)' || true
+          release_apk_count=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | wc -l)
+          if [ "${release_apk_count}" -ne 1 ]; then
+            echo "::error title=Unexpected release APK count::Expected one universal release APK, found ${release_apk_count}"
+            exit 1
+          fi
+          release_apk=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -n 1)
+          if ! unzip -l "${release_apk}" | grep -q 'lib/arm64-v8a/'; then
+            echo "::error title=Missing arm64-v8a::${release_apk} does not contain arm64-v8a native libraries"
+            exit 1
+          fi
 
       - name: Upload Gradle diagnostic log
         if: always()
