@@ -14,6 +14,7 @@
 #include <hev-task-io.h>
 #include <hev-task-io-socket.h>
 #include <hev-memory-allocator.h>
+#include <hev-memory-allocator-api.h>
 
 #include "hev-socks5-proto.h"
 #include "hev-socks5-misc-priv.h"

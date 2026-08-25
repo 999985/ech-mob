@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include <hev-memory-allocator.h>
+#include <hev-memory-allocator-api.h>
 
 #include "hev-socks5-misc-priv.h"
 #include "hev-socks5-logger-priv.h"

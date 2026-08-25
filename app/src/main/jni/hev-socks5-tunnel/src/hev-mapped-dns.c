@@ -14,6 +14,7 @@
 
 #include <hev-compiler.h>
 #include <hev-memory-allocator.h>
+#include <hev-memory-allocator-api.h>
 
 #include "hev-logger.h"
 

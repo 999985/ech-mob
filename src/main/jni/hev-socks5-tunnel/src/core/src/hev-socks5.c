@@ -17,6 +17,7 @@
 #include <hev-task-io-socket.h>
 #include <hev-task-dns.h>
 #include <hev-memory-allocator.h>
+#include <hev-memory-allocator-api.h>
 
 #include "hev-socks5-logger-priv.h"
 
