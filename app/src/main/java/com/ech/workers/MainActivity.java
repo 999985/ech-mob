@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         button_apps = (Button) findViewById(R.id.apps);
         button_control = (Button) findViewById(R.id.control);
         page_nodes = (LinearLayout) findViewById(R.id.page_nodes);
-        page_edit = (LinearLayout) findViewById(R.id.page_edit);
+        page_edit = (View) findViewById(R.id.page_edit);
         profile_list = (LinearLayout) findViewById(R.id.profile_list);
         node_summary = (TextView) findViewById(R.id.node_summary);
         tab_nodes = (Button) findViewById(R.id.tab_nodes);
