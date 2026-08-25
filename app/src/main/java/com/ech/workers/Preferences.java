@@ -248,6 +248,10 @@ public class Preferences
                 return prefs.getString(getKey(WSS_ADDR), "");
         }
 
+        public String getWssAddrFor(String profileId) {
+                return prefs.getString(WSS_ADDR + "_" + profileId, "");
+        }
+
         public void setWssAddr(String addr) {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(getKey(WSS_ADDR), addr);

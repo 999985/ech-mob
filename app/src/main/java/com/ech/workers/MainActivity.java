@@ -23,6 +23,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.net.VpnService;
 import android.os.Handler;
@@ -52,6 +54,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     // IPv4/IPv6 默认启用，不在 UI 展示
     private Button button_apps;
     private Button button_control;
+    private LinearLayout page_nodes;
+    private View page_edit;
+    private LinearLayout profile_list;
+    private TextView node_summary;
+    private Button tab_nodes;
+    private Button tab_edit;
+    private Button btn_add_node;
+    private Button btn_back_nodes;
+    private Button btn_save_profile_bottom;
+    private boolean updatingUi;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -78,6 +90,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         switch_fake_ip = (Switch) findViewById(R.id.fake_ip);
         button_apps = (Button) findViewById(R.id.apps);
         button_control = (Button) findViewById(R.id.control);
+        page_nodes = (LinearLayout) findViewById(R.id.page_nodes);
+        page_edit = (LinearLayout) findViewById(R.id.page_edit);
+        profile_list = (LinearLayout) findViewById(R.id.profile_list);
+        node_summary = (TextView) findViewById(R.id.node_summary);
+        tab_nodes = (Button) findViewById(R.id.tab_nodes);
+        tab_edit = (Button) findViewById(R.id.tab_edit);
+        btn_add_node = (Button) findViewById(R.id.btn_add_node);
+        btn_back_nodes = (Button) findViewById(R.id.btn_back_nodes);
+        btn_save_profile_bottom = (Button) findViewById(R.id.btn_save_profile_bottom);
 
         btn_add_profile.setOnClickListener(this);
         btn_save_profile.setOnClickListener(this);
@@ -88,9 +109,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         switch_fake_ip.setOnClickListener(this);
         button_apps.setOnClickListener(this);
         button_control.setOnClickListener(this);
+        tab_nodes.setOnClickListener(this);
+        tab_edit.setOnClickListener(this);
+        btn_add_node.setOnClickListener(this);
+        btn_back_nodes.setOnClickListener(this);
+        btn_save_profile_bottom.setOnClickListener(this);
         
         initProfileSpinner();
-		updateUI();
+        updateUI();
+        showPage(false);
 
 		/* Request VPN permission */
 
@@ -175,6 +202,109 @@ public class MainActivity extends Activity implements View.OnClickListener {
         spinner_profiles.setSelection(selectedIndex);
     }
 
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private void showPage(boolean edit) {
+        page_nodes.setVisibility(edit ? View.GONE : View.VISIBLE);
+        page_edit.setVisibility(edit ? View.VISIBLE : View.GONE);
+        tab_nodes.setSelected(!edit);
+        tab_edit.setSelected(edit);
+        tab_nodes.setBackgroundTintList(android.content.res.ColorStateList.valueOf(edit ? 0xFFE2E8F0 : 0xFF2563EB));
+        tab_edit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(edit ? 0xFF2563EB : 0xFFE2E8F0));
+        tab_nodes.setTextColor(edit ? 0xFF475569 : 0xFFFFFFFF);
+        tab_edit.setTextColor(edit ? 0xFFFFFFFF : 0xFF475569);
+    }
+
+    private List<ProfileItem> getSortedProfiles() {
+        Set<String> ids = prefs.getProfileIds();
+        List<ProfileItem> items = new ArrayList<>();
+        for (String id : ids) {
+            items.add(new ProfileItem(id, prefs.getProfileName(id)));
+        }
+        java.util.Collections.sort(items, new java.util.Comparator<ProfileItem>() {
+            @Override
+            public int compare(ProfileItem a, ProfileItem b) {
+                return a.name.compareToIgnoreCase(b.name);
+            }
+        });
+        return items;
+    }
+
+    private void refreshProfileList() {
+        profile_list.removeAllViews();
+        final String currentId = prefs.getCurrentProfileId();
+        boolean editable = !prefs.getEnable();
+        for (final ProfileItem item : getSortedProfiles()) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setPadding(dp(14), dp(10), dp(8), dp(10));
+            row.setBackgroundResource(R.drawable.panel_background);
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            rowParams.setMargins(0, 0, 0, dp(10));
+            profile_list.addView(row, rowParams);
+
+            LinearLayout text = new LinearLayout(this);
+            text.setOrientation(LinearLayout.VERTICAL);
+            text.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+            TextView name = new TextView(this);
+            name.setText(item.name + (item.id.equals(currentId) ? "  ·  当前" : ""));
+            name.setTextColor(0xFF172033);
+            name.setTextSize(16);
+            name.setTypeface(null, android.graphics.Typeface.BOLD);
+            TextView address = new TextView(this);
+            String addr = prefs.getWssAddrFor(item.id);
+            address.setText(addr.isEmpty() ? getString(R.string.node_not_configured) : addr);
+            address.setTextColor(0xFF64748B);
+            address.setTextSize(12);
+            address.setMaxLines(1);
+            address.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            text.addView(name);
+            text.addView(address);
+            row.addView(text);
+
+            Button select = new Button(this);
+            select.setText(item.id.equals(currentId) ? R.string.node_selected : R.string.node_select);
+            select.setTextSize(11);
+            select.setEnabled(editable && !item.id.equals(currentId));
+            row.addView(select, new LinearLayout.LayoutParams(dp(66), dp(42)));
+            Button edit = new Button(this);
+            edit.setText(R.string.btn_edit);
+            edit.setTextSize(11);
+            edit.setEnabled(editable);
+            row.addView(edit, new LinearLayout.LayoutParams(dp(66), dp(42)));
+
+            View.OnClickListener selectListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!editable) {
+                        return;
+                    }
+                    savePrefs();
+                    prefs.setCurrentProfileId(item.id);
+                    updateUI();
+                }
+            };
+            row.setOnClickListener(selectListener);
+            select.setOnClickListener(selectListener);
+            edit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!editable) {
+                        return;
+                    }
+                    savePrefs();
+                    prefs.setCurrentProfileId(item.id);
+                    updateUI();
+                    showPage(true);
+                }
+            });
+        }
+    }
+
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
         if ((result == RESULT_OK) && prefs.getEnable()) {
@@ -219,6 +349,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         prefs.setCurrentProfileId(newId);
                         refreshProfileSpinner();
                         updateUI();
+                        showPage(true);
                         dialog.dismiss();
                     }
                 });
@@ -281,14 +412,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 	@Override
 	public void onClick(View view) {
-        if (view == checkbox_global || view == switch_auto_best || view == switch_fake_ip) {
+        if (view == tab_nodes) {
+            if (!prefs.getEnable()) {
+                savePrefs();
+            }
+            showPage(false);
+        } else if (view == tab_edit) {
+            showPage(true);
+        } else if (view == btn_add_node) {
+            showAddProfileDialog();
+        } else if (view == btn_back_nodes) {
+            if (!prefs.getEnable()) {
+                savePrefs();
+            }
+            showPage(false);
+            updateUI();
+        } else if (view == checkbox_global || view == switch_auto_best || view == switch_fake_ip) {
             savePrefs();
             updateUI();
         } else if (view == button_apps) {
             startActivity(new Intent(this, AppListActivity.class));
         } else if (view == btn_add_profile) {
             showAddProfileDialog();
-        } else if (view == btn_save_profile) {
+        } else if (view == btn_save_profile || view == btn_save_profile_bottom) {
             String wssAddr = edittext_wss_addr.getText().toString().trim();
             if (wssAddr.isEmpty()) {
                 Toast.makeText(this, "服务器地址不能为空", Toast.LENGTH_SHORT).show();
@@ -296,6 +442,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             savePrefs();
             Toast.makeText(this, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+            if (view == btn_save_profile_bottom) {
+                updateUI();
+                showPage(false);
+            }
         } else if (view == btn_rename_profile) {
             showRenameProfileDialog();
         } else if (view == btn_delete_profile) {
@@ -333,6 +483,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         spinner_routing.setSelection("global".equals(routing) ? 1 : ("none".equals(routing) ? 2 : 0));
         switch_auto_best.setChecked(prefs.getAutoBest());
         switch_fake_ip.setChecked(prefs.getFakeIp());
+        node_summary.setText(prefs.getProfileName(prefs.getCurrentProfileId()) + "  ·  "
+                + (prefs.getEnable() ? getString(R.string.node_running) : getString(R.string.node_stopped)));
+        refreshProfileList();
 
         boolean editable = !prefs.getEnable();
         edittext_socks_port.setEnabled(editable);

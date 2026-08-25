@@ -2,6 +2,19 @@
 <resources>
         <string name="app_name">ECH-Workers</string>
         <string name="app_subtitle">安全、快速的 ECH 隧道</string>
+        <string name="tab_nodes">节点</string>
+        <string name="tab_edit">编辑节点</string>
+        <string name="node_list_title">我的节点</string>
+        <string name="edit_node_title">编辑节点</string>
+        <string name="add_node">添加节点</string>
+        <string name="back_nodes">返回节点</string>
+        <string name="btn_edit">编辑</string>
+        <string name="node_selected">当前</string>
+        <string name="node_select">选择</string>
+        <string name="node_running">运行中</string>
+        <string name="node_stopped">已停止</string>
+        <string name="node_not_configured">未填写服务器地址</string>
+        <string name="save_and_back">保存并返回节点列表</string>
         <string name="connection_section">连接参数</string>
         <string name="routing_section">智能分流</string>
         <string name="socks_port">本地代理端口：</string>

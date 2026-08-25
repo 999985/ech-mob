@@ -1,107 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F7FB"
-    android:fillViewport="true">
+    android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:gravity="center_vertical"
         android:padding="16dp">
+        <ImageView
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/app_name"
+            android:src="@mipmap/sockstun" />
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingBottom="16dp">
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="12dp"
-                android:contentDescription="@string/app_name"
-                android:src="@mipmap/sockstun" />
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/app_name"
-                    android:textColor="#172033"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/app_subtitle"
-                    android:textColor="#64748B"
-                    android:textSize="13sp" />
-            </LinearLayout>
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_name" android:textColor="#172033" android:textSize="21sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_subtitle" android:textColor="#64748B" android:textSize="12sp" />
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/panel_background"
-            android:orientation="vertical"
-            android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/profile_label" android:textColor="#172033" android:textSize="16sp" android:textStyle="bold" />
-            <Spinner android:id="@+id/profile_spinner" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="8dp" android:spinnerMode="dropdown" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
-                <Button android:id="@+id/btn_add_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/btn_add" android:textSize="12sp" />
-                <Button android:id="@+id/btn_save_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/save" android:textSize="12sp" />
-                <Button android:id="@+id/btn_rename_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/btn_rename" android:textSize="12sp" />
-                <Button android:id="@+id/btn_delete_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/btn_delete" android:textSize="12sp" />
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/panel_background"
-            android:orientation="vertical"
-            android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/connection_section" android:textColor="#172033" android:textSize="16sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/wss_addr" android:textColor="#64748B" />
-            <EditText android:id="@+id/wss_addr" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="wss://worker.example.com/path" android:inputType="textUri" android:singleLine="true" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/socks_port" android:textColor="#64748B" />
-                    <EditText android:id="@+id/socks_port" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="number" android:singleLine="true" />
-                </LinearLayout>
-                <Space android:layout_width="12dp" android:layout_height="1dp" />
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/token" android:textColor="#64748B" />
-                    <EditText android:id="@+id/token" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" android:singleLine="true" />
-                </LinearLayout>
-            </LinearLayout>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/ech_dns" android:textColor="#64748B" />
-            <EditText android:id="@+id/ech_dns" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="https://dns.alidns.com/dns-query" android:inputType="textUri" android:singleLine="true" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/ech_domain" android:textColor="#64748B" />
-            <EditText android:id="@+id/ech_domain" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" android:singleLine="true" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/panel_background"
-            android:orientation="vertical"
-            android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/routing_section" android:textColor="#172033" android:textSize="16sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/pref_ip" android:textColor="#64748B" />
-            <EditText android:id="@+id/pref_ip" android:layout_width="match_parent" android:layout_height="112dp" android:gravity="top|start" android:hint="@string/pref_ip_hint" android:inputType="textMultiLine|textNoSuggestions" android:padding="10dp" android:scrollbars="vertical" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/pref_ip_help" android:textColor="#94A3B8" android:textSize="12sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/routing_mode_label" android:textColor="#64748B" />
-            <Spinner android:id="@+id/routing_mode" android:layout_width="match_parent" android:layout_height="48dp" android:entries="@array/routing_modes" android:spinnerMode="dropdown" />
-            <Switch android:id="@+id/auto_best" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/auto_best" />
-            <Switch android:id="@+id/fake_ip" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/fake_ip" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:orientation="horizontal">
-                <CheckBox android:id="@+id/global" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/global" />
-                <Button android:id="@+id/apps" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/apps" />
-            </LinearLayout>
-        </LinearLayout>
-        <Button android:id="@+id/control" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="16dp" android:text="@string/control_enable" android:textColor="#FFFFFF" android:textSize="16sp" />
     </LinearLayout>
-</ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="#E2E8F0"
+        android:padding="3dp">
+        <Button android:id="@+id/tab_nodes" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:text="@string/tab_nodes" android:textSize="13sp" />
+        <Button android:id="@+id/tab_edit" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:text="@string/tab_edit" android:textSize="13sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp">
+
+        <LinearLayout
+            android:id="@+id/page_nodes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/node_list_title" android:textColor="#172033" android:textSize="20sp" android:textStyle="bold" />
+                    <TextView android:id="@+id/node_summary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="#64748B" android:textSize="13sp" />
+                    <LinearLayout android:id="@+id/profile_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="vertical" />
+                    <Button android:id="@+id/btn_add_node" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="4dp" android:text="@string/add_node" />
+                </LinearLayout>
+            </ScrollView>
+            <Button android:id="@+id/control" android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginStart="16dp" android:layout_marginEnd="16dp" android:layout_marginBottom="16dp" android:text="@string/control_enable" android:textColor="#FFFFFF" android:textSize="16sp" />
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/page_edit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:fillViewport="true">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+                    <Button android:id="@+id/btn_back_nodes" android:layout_width="wrap_content" android:layout_height="44dp" android:text="@string/back_nodes" android:textSize="12sp" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:text="@string/edit_node_title" android:textColor="#172033" android:textSize="20sp" android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:background="@drawable/panel_background" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/profile_label" android:textColor="#64748B" />
+                    <Spinner android:id="@+id/profile_spinner" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="4dp" android:spinnerMode="dropdown" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="horizontal">
+                        <Button android:id="@+id/btn_add_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/btn_add" android:textSize="12sp" />
+                        <Button android:id="@+id/btn_save_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/save" android:textSize="12sp" />
+                        <Button android:id="@+id/btn_rename_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/btn_rename" android:textSize="12sp" />
+                        <Button android:id="@+id/btn_delete_profile" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/btn_delete" android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:background="@drawable/panel_background" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/connection_section" android:textColor="#172033" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/wss_addr" android:textColor="#64748B" />
+                    <EditText android:id="@+id/wss_addr" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="wss://worker.example.com/path" android:inputType="textUri" android:singleLine="true" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/socks_port" android:textColor="#64748B" />
+                            <EditText android:id="@+id/socks_port" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="number" android:singleLine="true" />
+                        </LinearLayout>
+                        <Space android:layout_width="12dp" android:layout_height="1dp" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/token" android:textColor="#64748B" />
+                            <EditText android:id="@+id/token" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" android:singleLine="true" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/ech_dns" android:textColor="#64748B" />
+                    <EditText android:id="@+id/ech_dns" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" android:singleLine="true" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/ech_domain" android:textColor="#64748B" />
+                    <EditText android:id="@+id/ech_domain" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" android:singleLine="true" />
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:background="@drawable/panel_background" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/routing_section" android:textColor="#172033" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/pref_ip" android:textColor="#64748B" />
+                    <EditText android:id="@+id/pref_ip" android:layout_width="match_parent" android:layout_height="112dp" android:gravity="top|start" android:hint="@string/pref_ip_hint" android:inputType="textMultiLine|textNoSuggestions" android:padding="10dp" android:scrollbars="vertical" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/pref_ip_help" android:textColor="#94A3B8" android:textSize="12sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/routing_mode_label" android:textColor="#64748B" />
+                    <Spinner android:id="@+id/routing_mode" android:layout_width="match_parent" android:layout_height="48dp" android:entries="@array/routing_modes" android:spinnerMode="dropdown" />
+                    <Switch android:id="@+id/auto_best" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/auto_best" />
+                    <Switch android:id="@+id/fake_ip" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/fake_ip" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <CheckBox android:id="@+id/global" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/global" />
+                        <Button android:id="@+id/apps" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/apps" />
+                    </LinearLayout>
+                </LinearLayout>
+                <Button android:id="@+id/btn_save_profile_bottom" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="12dp" android:text="@string/save_and_back" />
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+</LinearLayout>
