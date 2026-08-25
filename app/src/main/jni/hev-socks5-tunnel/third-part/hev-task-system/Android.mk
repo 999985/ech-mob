@@ -23,7 +23,33 @@ LOCAL_MODULE    := libhev-task-system
 LOCAL_SRC_FILES := $(patsubst $(SRCDIR)/%,src/%,$(SRCFILES))
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/src \
-	$(LOCAL_PATH)/include
+	$(LOCAL_PATH)/include \
+	$(LOCAL_PATH)/src/kern/aide \
+	$(LOCAL_PATH)/src/kern/core \
+	$(LOCAL_PATH)/src/kern/io \
+	$(LOCAL_PATH)/src/kern/itc \
+	$(LOCAL_PATH)/src/kern/sync \
+	$(LOCAL_PATH)/src/kern/task \
+	$(LOCAL_PATH)/src/kern/time \
+	$(LOCAL_PATH)/src/lib/cio/base \
+	$(LOCAL_PATH)/src/lib/cio/buffer \
+	$(LOCAL_PATH)/src/lib/cio/fd \
+	$(LOCAL_PATH)/src/lib/cio/null \
+	$(LOCAL_PATH)/src/lib/cio/socket \
+	$(LOCAL_PATH)/src/lib/dns \
+	$(LOCAL_PATH)/src/lib/io/basic \
+	$(LOCAL_PATH)/src/lib/io/buffer \
+	$(LOCAL_PATH)/src/lib/io/pipe \
+	$(LOCAL_PATH)/src/lib/io/poll \
+	$(LOCAL_PATH)/src/lib/io/socket \
+	$(LOCAL_PATH)/src/lib/list \
+	$(LOCAL_PATH)/src/lib/misc \
+	$(LOCAL_PATH)/src/lib/object \
+	$(LOCAL_PATH)/src/lib/rbtree \
+	$(LOCAL_PATH)/src/mem/api \
+	$(LOCAL_PATH)/src/mem/base \
+	$(LOCAL_PATH)/src/mem/simple \
+	$(LOCAL_PATH)/src/mem/slice
 LOCAL_CFLAGS += -fvisibility=hidden $(CONFIG_CFLAGS)
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_CFLAGS += -mfpu=neon
