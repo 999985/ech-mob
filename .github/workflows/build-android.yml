@@ -126,7 +126,12 @@ jobs:
           if [ "${gradle_status}" -ne 0 ]; then
             echo "Gradle failed with exit code ${gradle_status}; last 120 log lines:"
             tail -n 120 gradle-build.log
-            diagnostic=$(tail -n 40 gradle-build.log | tr '\n' ' ' | tr '\r' ' ' | cut -c1-60000)
+            diagnostic=$(
+              {
+                grep -E 'FAILURE:|What went wrong:|Execution failed|Could not |A problem occurred|Caused by:|error:' gradle-build.log || true
+                tail -n 80 gradle-build.log
+              } | tr '\n' ' ' | tr '\r' ' ' | cut -c1-60000
+            )
             echo "::error title=Gradle build failure::${diagnostic}"
             exit "${gradle_status}"
           fi
