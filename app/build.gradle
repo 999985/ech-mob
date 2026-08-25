@@ -1,0 +1,99 @@
+apply plugin: 'com.android.application'
+
+def signingPropertiesFile = rootProject.file('store.properties')
+def signingProperties = new Properties()
+def hasReleaseSigning = signingPropertiesFile.exists()
+if (hasReleaseSigning) {
+        signingPropertiesFile.withInputStream { signingProperties.load(it) }
+}
+
+android {
+        namespace "com.ech.workers"
+        compileSdkVersion 34
+        ndkVersion "26.3.11579264"
+
+        defaultConfig {
+                applicationId "com.ech.workers"
+                minSdkVersion 24
+                targetSdkVersion 34
+                versionCode 1
+                versionName "1.0"
+                // archivesName 不在 defaultConfig 作用域，移至 base 扩展
+                ndk {
+                        abiFilters "armeabi-v7a", "arm64-v8a",'x86','x86_64'
+                }
+                externalNativeBuild {
+                        ndkBuild {
+                                arguments "APP_CFLAGS+=-DPKGNAME=com/ech/workers -ffile-prefix-map=${rootDir}=."
+                                arguments "APP_LDFLAGS+=-Wl,--build-id=none"
+                        }
+                }
+        }
+
+	signingConfigs {
+		if (hasReleaseSigning) {
+			release {
+				storeFile rootProject.file(signingProperties['storeFile'])
+				storePassword signingProperties['storePassword']
+				keyAlias signingProperties['keyAlias']
+				keyPassword signingProperties['keyPassword']
+			}
+		}
+	}
+
+		buildTypes {
+			release {
+				minifyEnabled false
+				if (hasReleaseSigning) {
+					signingConfig signingConfigs.release
+				}
+			}
+			debug {
+				minifyEnabled false
+			}
+		}
+
+        splits {
+                abi {
+                        enable true
+                        reset()
+                        include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+                        universalApk true
+                }
+        }
+
+	externalNativeBuild {
+		ndkBuild {
+			path "src/main/jni/Android.mk"
+		}
+	}
+
+	lintOptions {
+		checkReleaseBuilds false
+		// Or, if you prefer, you can continue to check for errors in release builds,
+		// but continue the build even when errors are found:
+		abortOnError false
+	}
+
+	dependenciesInfo {
+		// Disables dependency metadata when building APKs.
+		includeInApk = false
+		// Disables dependency metadata when building Android App Bundles.
+		includeInBundle = false
+	}
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+plugins.withId('base') {
+    base {
+        archivesName = "${android.defaultConfig.applicationId}-${android.defaultConfig.versionName}"
+    }
+}
+
+dependencies {
+	implementation 'androidx.appcompat:appcompat:1.4.1'
+	implementation files(rootProject.file('ech-workers.aar'))
+}
