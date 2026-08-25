@@ -26,7 +26,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: "1.26.x"
           cache-dependency-path: go.sum
 
       - name: Install gomobile
@@ -40,11 +40,26 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Debug Go and gomobile environment
+        shell: bash
+        run: |
+          set -euxo pipefail
+          go version
+          go env GOVERSION GOOS GOARCH CGO_ENABLED GOMOD GOPATH GOMODCACHE
+          gomobile version || true
+          go list -m -json golang.org/x/mobile
+          go list -m all
+
       - name: Test Go core
         run: go test ./...
 
       - name: Build AAR
         run: |
+          set -euxo pipefail
+          echo "Building gomobile AAR from $(pwd)"
+          test -f go.mod
+          test -f workers.go
+          go list -m golang.org/x/mobile
           gomobile bind -target=android \
             -androidapi=24 \
             -javapkg=com.ech.workers \
