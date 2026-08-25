@@ -35,11 +35,38 @@ LOCAL_SRC_FILES := $(patsubst $(SRCDIR)/%,src/%,$(SRCFILES))
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/src \
 	$(LOCAL_PATH)/src/misc \
+	$(LOCAL_PATH)/src/core/src \
 	$(LOCAL_PATH)/src/core/include \
 	$(LOCAL_PATH)/third-part/yaml/include \
 	$(LOCAL_PATH)/third-part/lwip/src/include \
 	$(LOCAL_PATH)/third-part/lwip/src/ports/include \
-	$(LOCAL_PATH)/third-part/hev-task-system/include
+	$(LOCAL_PATH)/third-part/hev-task-system/include \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/aide \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/core \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/io \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/itc \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/sync \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/task \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/kern/time \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/cio/base \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/cio/buffer \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/cio/fd \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/cio/null \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/cio/socket \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/dns \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/io/basic \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/io/buffer \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/io/pipe \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/io/poll \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/io/socket \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/list \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/misc \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/object \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/lib/rbtree \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/mem/api \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/mem/base \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/mem/simple \
+	$(LOCAL_PATH)/third-part/hev-task-system/src/mem/slice
 LOCAL_CFLAGS += -DFD_SET_DEFINED -DSOCKLEN_T_DEFINED -DENABLE_LIBRARY
 LOCAL_CFLAGS += $(VERSION_CFLAGS)
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
