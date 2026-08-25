@@ -1132,6 +1132,9 @@ func shouldBypassProxy(targetHost string) bool {
 		return false
 	}
 
+	if isLikelyChinaDomain(targetHost) {
+		return true
+	}
 	if matchDomain(targetHost) {
 		return true
 	}
@@ -1158,6 +1161,9 @@ func shouldBypassProxy(targetHost string) bool {
 }
 
 func isChinaIP(addr netip.Addr) bool {
+	if addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() {
+		return true
+	}
 	ipRangesMu.RLock()
 	defer ipRangesMu.RUnlock()
 	if addr.Is4() || addr.Is4In6() {
@@ -1196,6 +1202,26 @@ func isChinaIP(addr netip.Addr) bool {
 	return false
 }
 
+// isLikelyChinaDomain keeps basic domestic routing useful while the full
+// geosite list is downloading or temporarily unavailable.
+func isLikelyChinaDomain(domain string) bool {
+	domain = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(domain)), ".")
+	if domain == "" {
+		return false
+	}
+	for _, suffix := range []string{
+		".cn", ".中国", ".公司", ".网络", ".baidu.com", ".bilibili.com",
+		".qq.com", ".weixin.qq.com", ".wechat.com", ".taobao.com", ".tmall.com",
+		".jd.com", ".aliyun.com", ".alipay.com", ".163.com", ".126.com",
+		".zhihu.com", ".douyin.com", ".bytedance.com", ".mi.com",
+	} {
+		if domain == strings.TrimPrefix(suffix, ".") || strings.HasSuffix(domain, suffix) {
+			return true
+		}
+	}
+	return false
+}
+
 func cleanDNSCacheLoop(ctx context.Context) {
 	ticker := time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
@@ -1216,6 +1242,13 @@ func cleanDNSCacheLoop(ctx context.Context) {
 }
 
 func loadRoutingRules() error {
+	for _, name := range []string{"geosite_cn.txt", "geoip_v4.txt", "geoip_v6.txt"} {
+		info, err := os.Stat(dataPath(name))
+		if err != nil || info.Size() == 0 {
+			log.Printf("[routing] rule file %s is missing or empty; refreshing", name)
+			return fetchAndReloadRules()
+		}
+	}
 	if _, err := os.Stat(dataPath("geosite_cn.txt")); os.IsNotExist(err) {
 		return fetchAndReloadRules()
 	}
@@ -1282,6 +1315,9 @@ func loadRoutingRules() error {
 		}
 		f.Close()
 	}
+	if len(newIPv4Ranges) == 0 && len(newIPv6Ranges) == 0 {
+		return fmt.Errorf("routing rule files contain no valid IP ranges")
+	}
 
 	domainTrieMu.Lock()
 	domainTrie = newTrie
@@ -1291,6 +1327,7 @@ func loadRoutingRules() error {
 	chinaIPv4Ranges = newIPv4Ranges
 	chinaIPv6Ranges = newIPv6Ranges
 	ipRangesMu.Unlock()
+	log.Printf("[routing] rules loaded: ipv4=%d ipv6=%d fallback_baidu=%t", len(newIPv4Ranges), len(newIPv6Ranges), matchDomain("baidu.com"))
 	return nil
 }
 
@@ -1317,7 +1354,12 @@ func fetchAndReloadRules() error {
 		"geoip_v6.tmp":   "https://raw.githubusercontent.com/ChanthMiao/China-IPv6-List/release/cn6.txt",
 	}
 	for fileName, url := range files {
-		downloadFile(url, dataPath(fileName))
+		if err := downloadFile(url, dataPath(fileName)); err != nil {
+			for tempName := range files {
+				_ = os.Remove(dataPath(tempName))
+			}
+			return fmt.Errorf("download %s: %w", fileName, err)
+		}
 	}
 
 	newTrie := &trieNode{children: make(map[string]*trieNode)}
@@ -1382,6 +1424,9 @@ func fetchAndReloadRules() error {
 		}
 		f.Close()
 	}
+	if len(newIPv4Ranges) == 0 && len(newIPv6Ranges) == 0 {
+		return fmt.Errorf("downloaded routing rules contain no valid IP ranges")
+	}
 
 	domainTrieMu.Lock()
 	domainTrie = newTrie
@@ -1403,20 +1448,25 @@ func fetchAndReloadRules() error {
 	return nil
 }
 
-func downloadFile(url, path string) {
-	os.Remove(path)
+func downloadFile(url, path string) error {
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {
-		return
+		return err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return fmt.Errorf("HTTP %s", resp.Status)
+	}
 	out, err := os.Create(path)
 	if err != nil {
-		return
+		return err
 	}
 	defer out.Close()
-	io.Copy(out, resp.Body)
+	if _, err := io.Copy(out, resp.Body); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ======================== gomobile 导出接口 (供 Java/JNI 调用) ========================
