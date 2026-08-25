@@ -1510,6 +1510,7 @@ func StartSocksProxyWithOptions(localAddr, wsAddr, echDns, echName, prefIp, toke
 	proxyServerRunning = true
 
 	go func() {
+		log.Printf("[config] routing=%s fake_ip=%t auto_best=%t preferred_ips=%s", routingMode, useFakeIP, autoBest, serverIP)
 		_ = prepareECH()
 		go startECHAutoRefresh(ctx)
 		go cleanDNSCacheLoop(ctx)
