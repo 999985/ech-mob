@@ -112,7 +112,23 @@ jobs:
           gradle-version: "8.2"
 
       - name: Build APKs
-        run: gradle --no-daemon assembleDebug assembleRelease
+        run: |
+          set -o pipefail
+          gradle --version
+          java -version
+          echo "ANDROID_HOME=${ANDROID_HOME:-}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-}"
+          find . -maxdepth 2 -type f -print | sort
+          gradle --no-daemon --stacktrace --info assembleDebug assembleRelease 2>&1 | tee gradle-build.log
+
+      - name: Upload Gradle diagnostic log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: gradle-build.log
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
