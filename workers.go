@@ -551,10 +551,37 @@ func handleTunnel(conn net.Conn, target, clientAddr string, mode int, firstFrame
 		return err
 	}
 
-	firstPayload := []byte(fmt.Sprintf("CONNECT:%s\n", target))
+	// ===== 开始：高性能私有二进制协议构建 =====
+	targetHost, portStr, _ := net.SplitHostPort(target)
+	portInt, _ := strconv.Atoi(portStr)
+
+	var firstPayload []byte
+	firstPayload = append(firstPayload, 0x01) // 版本号 0x01
+
+	if ip := net.ParseIP(targetHost); ip != nil {
+		if ip4 := ip.To4(); ip4 != nil {
+			firstPayload = append(firstPayload, 0x01) // IPv4
+			firstPayload = append(firstPayload, ip4...)
+		} else {
+			firstPayload = append(firstPayload, 0x03) // IPv6
+			firstPayload = append(firstPayload, ip.To16()...)
+		}
+	} else {
+		firstPayload = append(firstPayload, 0x02) // 域名
+		firstPayload = append(firstPayload, byte(len(targetHost)))
+		firstPayload = append(firstPayload, []byte(targetHost)...)
+	}
+
+	// 端口号 (大端序 2 字节)
+	portBytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(portBytes, uint16(portInt))
+	firstPayload = append(firstPayload, portBytes...)
+
+	// 追加 0-RTT 早期数据 (完全避免字符串拼接开销)
 	if firstFrame != "" {
 		firstPayload = append(firstPayload, []byte(firstFrame)...)
 	}
+	// ===== 结束：高性能私有二进制协议构建 =====
 	if err := writeWS(websocket.BinaryMessage, firstPayload); err != nil {
 		sendErrorResponse(conn, mode)
 		return err
